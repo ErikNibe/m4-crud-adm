@@ -1,16 +1,17 @@
 import format from "pg-format";
 import { client } from "../../database";
+import { tUserRequest, tUserWithoutPasswordResult, tUserWithoutPassword } from "../../interfaces/users.interfaces";
+import { userWithoutPasswordSchema } from "../../schemas/users.schemas";
 
-import { iUserRequest, tUserWithoutPasswordResult, tUserWithoutPassword } from "../../interfaces/users.interfaces";
 
-const createUserServices = async (reqData: iUserRequest): Promise<tUserWithoutPassword> => {
+const createUserService = async (reqData: tUserRequest): Promise<tUserWithoutPassword> => {
 
     const queryString: string = format(
         `
             INSERT INTO
                 users(%I)
             VALUES(%L)
-            RETURNING "id", "name", "email", "admin", "active";
+            RETURNING *;
         `,
         Object.keys(reqData),
         Object.values(reqData)
@@ -18,7 +19,9 @@ const createUserServices = async (reqData: iUserRequest): Promise<tUserWithoutPa
 
     const queryResult: tUserWithoutPasswordResult = await client.query(queryString);
 
-    return queryResult.rows[0];
+    const userWithoutPassword = userWithoutPasswordSchema.parse(queryResult.rows[0]);
+
+    return userWithoutPassword;
 };
 
-export default createUserServices;
+export default createUserService;

@@ -2,33 +2,34 @@ import { NextFunction, Request, Response } from "express";
 import { QueryConfig } from "pg";
 import { client } from "../database";
 import { tUserResult } from "../interfaces/users.interfaces";
-import { AppError } from "../errors"
+import { AppError } from "../errors";
 
-const verifyEmailExists = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
+const verifyUserExists = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
 
-    const { email } = req.body;
+    const userIdParam: number = parseInt(req.params.id);
 
-    const queryString = `
+    const queryString: string = `
         SELECT
             *
-        FROM
+        FROM 
             users
         WHERE
-            "email" = $1;
+            "id" = $1;
     `;
 
     const queryConfig: QueryConfig = {
         text: queryString,
-        values: [email]
+        values: [userIdParam]
     };
 
     const queryResult: tUserResult = await client.query(queryConfig);
+    
+    if (!queryResult.rowCount) {
 
-    if (queryResult.rowCount) {
-        throw new AppError("Email already exists, try another one.", 409);
+        throw new AppError("User not found.", 404);
     };
 
     return next();
 };
 
-export { verifyEmailExists };
+export default verifyUserExists;

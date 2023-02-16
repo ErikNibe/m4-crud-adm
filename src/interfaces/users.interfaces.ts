@@ -1,20 +1,17 @@
 import { QueryResult } from "pg";
+import { z } from "zod";
+import { updateUserRequestSchema, userRequestSchema, userSchema } from "../schemas/users.schemas";
 
-interface iUserRequest {
-    name: string,
-    email: string,
-    password: string,
-    admin: boolean,
-    active: boolean
-};
 
-interface iUser extends iUserRequest {
-    id: number
-};
+type tUserRequest = z.infer<typeof userRequestSchema>;
 
-type tUserWithoutPassword = Omit<iUser, "password">;
+type tUser = z.infer<typeof userSchema>;
+
+type tUserWithoutPassword = Omit<tUser, "password">;
 type tUserWithoutPasswordResult = QueryResult<tUserWithoutPassword>;
 
-type tUserResult = QueryResult<iUser>;
+type tUserResult = QueryResult<tUser>;
 
-export { iUserRequest, tUserWithoutPassword, tUserWithoutPasswordResult, tUserResult };
+type tUpdateUserRequest = z.infer<typeof updateUserRequestSchema>;
+
+export { tUserRequest, tUserWithoutPassword, tUserWithoutPasswordResult, tUserResult, tUpdateUserRequest };
